@@ -1,0 +1,17 @@
+﻿Anotações sobre o Projeto após ser "finalizado".
+
+Quem sabe depois de um tempo ver a evolução que teve, ou até mesmo melhorar ele.
+
+A ideia do projeto está pronta, porém é possível aperfeiçoar e melhorar a lógica.
+Inicialmente foi bem tranquilo mas depois para montar toda a lógica de funcionamento de gerenciamento foi onde tive maior dificuldade. Irei finalizar o projeto por aqui mesmo, por mais que fosse possível complementar, mais o escopo inicial foi completado.
+Alguns pontos a se ressaltar, é a um pouco da lógica mal em verificar o livro que está com algum User.
+E também optei em não usar exception, por não achar necessário nessas situações, então como resposta optei por retornar null, em caso de possíveis erros.
+
+A interface Management, deve ser capaz de melhorar, já que muitas coisas se repetem
+
+Pontos que podiam ser adicionados:
+- ADD e REMOVE, Books, além de mexer na quantidade sem precisar de um User
+- Usar os metódos de Studente(DeadLine) e Teacher(CalculateDays), de forma separada para verificação de dos dias
+
+De certa forma o projeto funciona, mas acredito que muitas coisas podiam ser melhoradas e com o tempo acabei perdendo o rumo de continuar e complementa-lo.
+Mas agora irei progredir em outros assuntos.
