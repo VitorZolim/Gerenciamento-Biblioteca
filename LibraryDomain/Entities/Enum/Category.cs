@@ -1,6 +1,6 @@
-﻿namespace ProjectLibrary.Entities.Enum
+﻿namespace Library.Domain.Entities
 {
-    enum Category
+    public enum Category
     {
         Romance = 0,
         Fantasy = 1,
