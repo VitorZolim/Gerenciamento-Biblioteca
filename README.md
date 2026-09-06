@@ -1,14 +1,20 @@
-# Gerenciador de Biblioteca (Console)
+# Gerenciador de Biblioteca
 
-Este é um projeto de gerenciamento de biblioteca, executado em console. Este projeto representa inicio desse ano como desenvolvedor, focado em colocar em prática meus conhecimentos de lógica, POO e resolução de problemas.
+Este projeto é um sistema de gerenciamento de biblioteca que começou como uma aplicação de console em C#. O objetivo inicial foi aplicar na prática meus conhecimentos de lógica de programação e orientação a objetos, criando o sistema do zero.
 
-## O Desafio
-O objetivo principal foi me desafiar a criar algo do zero. Eu pensei em cada funcionalidade, o quê deveria contender, o fluxo de entrada e saída de dados, alteração de valores, usuários, soluções para problemas.
-A ideia inicial do Projeto foi finalizado, porém tive algumas complicações com o tempo, o que ao me ver poderia ter aperfeiçoa-lo e em alguns parte poder ter melhor trabalhado. 
+A primeira versão tinha como papel estruturar a base lógica, o fluxo de dados, regras de empréstimo e usuários. 
 
+Agora, a intenção é refatorar o código antigo e implementar novas tecnologias e padrões à medida que avanço nos estudos de desenvolvimento back end.
 
-## Objetivo e Evolução
-Este projeto foi construído para ser uma "fotografia" do meu conhecimento atual. Minha intenção é:
-1. **Marcar o Início:** Registrar como eu tentei desenvolver algo do completo zero hoje.
-2. **Refatoração Futura:** Voltar a este código daqui a alguns meses para aplicar novas técnicas, Design Patterns, Bancos de Dados, Melhorá-lo.
-3. **Histórico de Crescimento:** Comparar as versões futuras e outros projetos com este, um ponto de partida para visualizar minha evolução como desenvolvedor.
+## Etapas do Projeto
+
+**Versão 1: Projeto em Console**
+- Lógica de negócios e validações.
+- Armazenamento de dados.
+- Interação via prompt de comando.
+*Nota: O código dessa primeira versão está salvo na aba de Releases do GitHub (v1.0.0-console).*
+
+**Versão 2: Web e Banco de Dados (Em andamento)**
+- Migração para ASP.NET Core.
+- Implementação de banco de dados SQL Server.
+- Integração usando Entity Framework Core.
