@@ -4,12 +4,9 @@
     {
         public int BookId { get; set; }
         public string BookTitle { get; set; }
-        public int Quantity { get; set; } //coluna calculada
+        public int Quantity { get; set; }
+        public string Author { get; set; }
         public Category Category { get; set; }
-
-        public bool Available()
-        {
-            return Quantity > 0;
-        }
+        public ICollection<UserBook> UserBooks { get; set; } = new List<UserBook>();
     }
 }

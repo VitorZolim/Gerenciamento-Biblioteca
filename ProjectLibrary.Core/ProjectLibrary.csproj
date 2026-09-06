@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Library.EFCore\Library.EFCore.csproj" />
+    <ProjectReference Include="..\Library.EFCore\Library.EFCore.csproj" />
   </ItemGroup>
 
 </Project>
