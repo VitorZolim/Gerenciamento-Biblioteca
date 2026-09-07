@@ -1,4 +1,6 @@
-﻿namespace Library.Domain.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace Library.Domain.Entities
 {
     public class Book 
     {
@@ -7,6 +9,8 @@
         public int Quantity { get; set; }
         public string Author { get; set; }
         public Category Category { get; set; }
+
+        [JsonIgnore]
         public ICollection<UserBook> UserBooks { get; set; } = new List<UserBook>();
     }
 }
