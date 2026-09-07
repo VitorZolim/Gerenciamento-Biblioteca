@@ -1,4 +1,4 @@
 .vs
 bin
 obj
-.Config.cs
+**/Config.cs

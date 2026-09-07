@@ -22,9 +22,26 @@ namespace Library.EFCore.Context
                     .IsRequired()
                     .HasColumnType("datetime2");
 
-                builder.Property(ub => ub.ReturnBook)
-                    .IsRequired()
+                builder.Property(ub => ub.DueBook)
+                       .IsRequired()
+                       .HasColumnType("datetime2");
+
+                builder.Property(ub => ub.ReturnedBook)
+                    .IsRequired(false)
                     .HasColumnType("datetime2");
+
+                builder.Ignore(x => x.Status);
+
+                builder.HasOne(x => x.User)
+                       .WithOne(x => x.UserBook)
+                       .HasForeignKey<UserBook>(x => x.UserId)
+                       .OnDelete(DeleteBehavior.Cascade);
+
+                builder.HasOne(x => x.Book)
+                       .WithMany(x => x.UserBooks)
+                       .HasForeignKey(x => x.BookId)
+                       .OnDelete(DeleteBehavior.Cascade);
+
             });
 
             modelBuilder.Entity<Book>(builder =>
