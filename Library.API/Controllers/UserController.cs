@@ -18,7 +18,7 @@ namespace Library.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
             var users = await _context.Users.AsNoTracking().Include(u => u.UserBook).ThenInclude(ub => ub.Book).ToListAsync();
 
@@ -26,7 +26,7 @@ namespace Library.API.Controllers
             {
                 u.UserId,
                 u.UserName,
-                UserBook = u.UserBook is null ? null : new UserBookDto 
+                UserBook = u.UserBook is null ? null : new UserDTO
                 {
                     BookId = u.UserBook.BookId,
                     BookTitle = u.UserBook.Book!.BookTitle,
@@ -41,7 +41,7 @@ namespace Library.API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
             var user = await _context.Users.AsNoTracking().Include(u => u.UserBook).ThenInclude(ub => ub.Book).SingleOrDefaultAsync(u => u.UserId == id);
             if (user is null)
@@ -51,7 +51,7 @@ namespace Library.API.Controllers
             {
                 user.UserId,
                 user.UserName,
-                UserBook = user.UserBook is null ? null : new UserBookDto 
+                UserBook = user.UserBook is null ? null : new UserDTO
                 {
                     BookId = user.UserBook.BookId,
                     BookTitle = user.UserBook.Book!.BookTitle,
