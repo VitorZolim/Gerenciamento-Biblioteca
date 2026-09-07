@@ -14,7 +14,7 @@ Agora, a intenção é refatorar o código antigo e implementar novas tecnologia
 - Interação via prompt de comando.
 *Nota: O código dessa primeira versão está salvo na aba de Releases do GitHub (v1.0.0-console).*
 
-**Versão 2: Web e Banco de Dados (Em andamento)**
+**Versão 2: Web e Banco de Dados**
 - Migração para ASP.NET Core.
 - Implementação de banco de dados SQL Server.
 - Integração usando Entity Framework Core.
