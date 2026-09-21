@@ -3,11 +3,6 @@ using Library.Domain.Entities.Enum;
 using Library.EFCore.Context;
 using LibraryDomain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Library.EFCore.Repositories
 {

@@ -7,20 +7,20 @@ using Microsoft.EntityFrameworkCore;
 namespace Library.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UserController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public UserController(AppDbContext context)
+        public UserController(IUserRepository userRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<object>>> GetUsers()
         {
-            var users = await _context.Users.AsNoTracking().Include(u => u.UserBook).ThenInclude(ub => ub.Book).ToListAsync();
+            var users = await _userRepository.GetUsersWithDetailsAsync();
 
             var usersResult = users.Select(u => new
             {
@@ -41,9 +41,10 @@ namespace Library.API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<UserDTO>> GetUser(int id)
+        public async Task<ActionResult<object>> GetUser(int id)
         {
-            var user = await _context.Users.AsNoTracking().Include(u => u.UserBook).ThenInclude(ub => ub.Book).SingleOrDefaultAsync(u => u.UserId == id);
+            var user = await _userRepository.GetUserWithDetailsByIdAsync(id);
+
             if (user is null)
                 return NotFound($"User Id: {id} not found");
 
@@ -71,11 +72,9 @@ namespace Library.API.Controllers
             if (user is null)
                 return BadRequest("Error Posting User");
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            await _userRepository.AddAsync(user);
 
-            return CreatedAtAction(nameof(GetUser),
-                new { id = user.UserId }, user);
+            return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
         }
 
         [HttpPut("{id:int}")]
@@ -84,8 +83,7 @@ namespace Library.API.Controllers
             if (id != user.UserId)
                 return BadRequest("Error updating User");
 
-            _context.Entry(user).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            await _userRepository.UpdateAsync(user);
 
             return Ok(user);
         }
@@ -93,16 +91,14 @@ namespace Library.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<User>> DeleteUser(int id)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
+            var user = await _userRepository.GetByIdAsync(id);
 
             if (user is null)
                 return NotFound($"User Id: {id} not found");
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            await _userRepository.DeleteAsync(user);
 
             return Ok(user);
         }
     }
-
 }

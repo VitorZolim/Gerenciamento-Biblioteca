@@ -10,7 +10,5 @@ namespace LibraryDomain.Repositories
         Task<IEnumerable<UserBook>> GetUserBooksByStatusAsync(LoanStatus status);
 
         Task<bool> UserHasBookAsync(int userId);
-
-        Task<UserBook?> GetUserBookByIdsAsync(int userId, int bookId);
     }
 }
