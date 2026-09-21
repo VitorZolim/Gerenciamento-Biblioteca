@@ -2,28 +2,34 @@
 using Library.Domain.Entities.Enum;
 using Library.EFCore.Context;
 using LibraryDomain.Entities.DTOs;
+using LibraryDomain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UserBookController : Controller
     {
-        private readonly AppDbContext _context;
-
-        public UserBookController(AppDbContext context)
+        // Necessario injetar os 3 repositórios para as validações
+        private readonly IUserBookRepository _userBookRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IBookRepository _bookRepository;
+ 
+        public UserBookController(IUserBookRepository userBookRepository,IUserRepository userRepository,IBookRepository bookRepository)
         {
-            _context = context;
+            _userBookRepository = userBookRepository;
+            _userRepository = userRepository;
+            _bookRepository = bookRepository;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserBookDTO>>> GetUserBooks()
         {
-            var userbook = await _context.UserBooks.AsNoTracking().Include(u => u.User).Include(b => b.Book).ToListAsync();
+            var userbooks = await _userBookRepository.GetUserBooksWithDetailsAsync();
 
-            var UBResults = userbook.Select(ub => new UserBookDTO
+            var UBResults = userbooks.Select(ub => new UserBookDTO
             {
                 UserId = ub.UserId,
                 UserName = ub.User.UserName,
@@ -41,25 +47,8 @@ namespace Library.API.Controllers
         [HttpGet("status/{status}")]
         public async Task<ActionResult<IEnumerable<UserBookDTO>>> GetUserBooksByStatus(LoanStatus status)
         {
-            IQueryable<UserBook> query = _context.UserBooks.AsNoTracking();
-            var today = DateTime.UtcNow.Date;
+            var userBooks = await _userBookRepository.GetUserBooksByStatusAsync(status);
 
-            query = status switch
-            {
-                LoanStatus.Returned => query.Where(ub => ub.ReturnedBook != null),
-
-                LoanStatus.Late => query.Where(ub =>
-                        ub.ReturnedBook == null && ub.DueBook < today),
-
-                LoanStatus.DueToday => query.Where(ub => 
-                        ub.ReturnedBook == null && ub.DueBook >= today && ub.DueBook < today.AddDays(1)),
-
-                LoanStatus.OnTime => query.Where(ub => ub.ReturnedBook == null && ub.DueBook >= today.AddDays(1)),
-
-                _ => query //retorna query da forma que está
-            };
-
-            var userBooks = await query.Include(ub => ub.User).Include(ub => ub.Book).ToListAsync();
             var UBResults = userBooks.Select(ub => new UserBookDTO
             {
                 UserId = ub.UserId,
@@ -78,17 +67,18 @@ namespace Library.API.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateUserBook(CreateUserBookDTO dto)
         {
-            //Validação de Entrada
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == dto.UserId);
+            //1. Valida se o usuário existe usando o repositório de usuarios
+            var user = await _userRepository.GetByIdAsync(dto.UserId);
             if (user is null)
                 return NotFound($"User Id: {dto.UserId} not found.");
 
-            var book = await _context.Books.FirstOrDefaultAsync(b => b.BookId == dto.BookId);
+            //2. Valida se o livro existe usando o repositório de livros
+            var book = await _bookRepository.GetByIdAsync(dto.BookId);
             if (book is null)
                 return NotFound($"Book Id: {dto.BookId} not found.");
 
-            //Verifica se o usuario já possui um livro
-            var userHasBook = await _context.UserBooks.AnyAsync(ub => ub.UserId == dto.UserId);
+            //3. Verifica se o usuario já possui um livro usando o método específico
+            var userHasBook = await _userBookRepository.UserHasBookAsync(dto.UserId);
             if (userHasBook)
                 return BadRequest("User already has a book.");
 
@@ -98,37 +88,35 @@ namespace Library.API.Controllers
                 BookId = dto.BookId
             };
 
-            await _context.UserBooks.AddAsync(userBook);
-            await _context.SaveChangesAsync();
+            await _userBookRepository.AddAsync(userBook);
 
             return CreatedAtAction(nameof(GetUserBooks), null, new UserBookDTO
             {
-                    UserId = userBook.UserId,
-                    UserName = user.UserName,
-                    BookId = userBook.BookId,
-                    BookTitle = book.BookTitle,
-                    DateOutBook = userBook.DateOutBook,
-                    DueBook = userBook.DueBook,
-                    ReturnedBook = userBook.ReturnedBook,
-                    Status = userBook.Status
+                UserId = userBook.UserId,
+                UserName = user.UserName,
+                BookId = userBook.BookId,
+                BookTitle = book.BookTitle,
+                DateOutBook = userBook.DateOutBook,
+                DueBook = userBook.DueBook,
+                ReturnedBook = userBook.ReturnedBook,
+                Status = userBook.Status
             });
         }
 
-
         [HttpPut("{idUser:int},{idBook:int}")]
-        public async Task<ActionResult> UpdateUser(int idUser, int idBook, UserBook userbook)
+        public async Task<ActionResult> UpdateUserBook(int idUser, int idBook, UserBook userbook)
         {
             if (idUser != userbook.UserId || idBook != userbook.BookId)
                 return BadRequest("UserId or BookId does not match");
 
-            var verifyUserBook = await _context.UserBooks.FirstOrDefaultAsync(ub =>ub.UserId == idUser &&ub.BookId == idBook);
+            var verifyUserBook = await _userBookRepository.GetByIdAsync(idUser, idBook);
 
             if (verifyUserBook is null)
                 return NotFound("UserBook not found.");
 
             verifyUserBook.ReturnedBook = userbook.ReturnedBook;
 
-            await _context.SaveChangesAsync();
+            await _userBookRepository.UpdateAsync(verifyUserBook);
 
             return Ok(verifyUserBook);
         }
@@ -136,13 +124,12 @@ namespace Library.API.Controllers
         [HttpDelete("{idUser:int},{idBook:int}")]
         public async Task<ActionResult<UserBook>> DeleteUserBook(int idUser, int idBook)
         {
-            var userbook = await _context.UserBooks.FirstOrDefaultAsync(u => u.UserId == idUser && u.BookId == idBook);
+            var userbook = await _userBookRepository.GetByIdAsync(idUser, idBook);
 
             if (userbook is null)
                 return NotFound($"Erro Not found");
 
-            _context.UserBooks.Remove(userbook);
-            await _context.SaveChangesAsync();
+            await _userBookRepository.DeleteAsync(userbook);
 
             return Ok(userbook);
         }
