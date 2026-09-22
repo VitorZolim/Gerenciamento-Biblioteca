@@ -19,10 +19,12 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(conn
 
 // Registrando o Repositório Genérico
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-// Registrando os Repositórios Específicos
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<IUserBookRepository, UserBookRepository>();
+// Registrando os Repositórios Específicos - Após o UnitOfWork não é necessario pois ele já instancia
+//builder.Services.AddScoped<IUserRepository, UserRepository>();
+//builder.Services.AddScoped<IBookRepository, BookRepository>();
+//builder.Services.AddScoped<IUserBookRepository, UserBookRepository>();
+//Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 

@@ -1,6 +1,8 @@
 ﻿using Library.Domain.Entities;
 using Library.EFCore.Context;
+using Library.EFCore.Repositories;
 using LibraryDomain.Entities.DTOs;
+using LibraryDomain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,17 +12,17 @@ namespace Library.API.Controllers
     [Route("api/[controller]")]
     public class UserController : Controller
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitofwork;
 
-        public UserController(IUserRepository userRepository)
+        public UserController(IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository;
+            _unitofwork = unitOfWork;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetUsers()
         {
-            var users = await _userRepository.GetUsersWithDetailsAsync();
+            var users = await _unitofwork.UserRepository.GetUsersWithDetailsAsync();
 
             var usersResult = users.Select(u => new
             {
@@ -43,7 +45,7 @@ namespace Library.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<object>> GetUser(int id)
         {
-            var user = await _userRepository.GetUserWithDetailsByIdAsync(id);
+            var user = await _unitofwork.UserRepository.GetUserWithDetailsByIdAsync(id);
 
             if (user is null)
                 return NotFound($"User Id: {id} not found");
@@ -72,7 +74,8 @@ namespace Library.API.Controllers
             if (user is null)
                 return BadRequest("Error Posting User");
 
-            await _userRepository.AddAsync(user);
+            await _unitofwork.UserRepository.AddAsync(user);
+            await _unitofwork.CommitAsync();
 
             return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
         }
@@ -83,7 +86,8 @@ namespace Library.API.Controllers
             if (id != user.UserId)
                 return BadRequest("Error updating User");
 
-            await _userRepository.UpdateAsync(user);
+            _unitofwork.UserRepository.Update(user);
+            await _unitofwork.CommitAsync();
 
             return Ok(user);
         }
@@ -91,12 +95,13 @@ namespace Library.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<User>> DeleteUser(int id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
+            var user = await _unitofwork.UserRepository.GetByIdAsync(id);
 
             if (user is null)
                 return NotFound($"User Id: {id} not found");
 
-            await _userRepository.DeleteAsync(user);
+            _unitofwork.UserRepository.Delete(user);
+            await _unitofwork.CommitAsync();
 
             return Ok(user);
         }

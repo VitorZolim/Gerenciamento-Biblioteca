@@ -25,20 +25,20 @@ namespace Library.EFCore.Repositories
         public async Task AddAsync(T entity)
         {
             await _context.Set<T>().AddAsync(entity);
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(T entity)
+        public void Update(T entity) //volta a ser sincrono, Update muda o estado da entidade, não vai direto ao banco
         {
             _context.Set<T>().Update(entity);
             //_context.Entry(entity).State = EntityState.Modified; Segunda Forma de mudar
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(T entity)
+        public void Delete(T entity) //mesma ideia do Update, apenas muda o estado sem ir ao banco
         {
             _context.Set<T>().Remove(entity);
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
         }
     }
 }

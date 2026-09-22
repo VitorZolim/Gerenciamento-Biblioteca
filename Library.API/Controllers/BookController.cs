@@ -10,24 +10,24 @@ namespace Library.API.Controllers
     [Route("api/[controller]")]
     public class BookController : Controller
     {
-        private readonly IBookRepository _bookRepository;
+        private readonly IUnitOfWork _unitofwork;
 
-        public BookController(IBookRepository bookRepository)
+        public BookController(IUnitOfWork unitOfWork)
         {
-            _bookRepository = bookRepository;
+            _unitofwork = unitOfWork;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
-            var books = await _bookRepository.GetAllAsync();
+            var books = await _unitofwork.BookRepository.GetAllAsync();
             return Ok(books);
         }
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Book>> GetBook(int id)
         {
-            var book = await _bookRepository.GetByIdAsync(id);
+            var book = await _unitofwork.BookRepository.GetByIdAsync(id);
 
             if (book is null)
                 return NotFound($"Book Id: {id} not found");
@@ -41,7 +41,8 @@ namespace Library.API.Controllers
             if (book is null)
                 return BadRequest("Error Posting Book");
 
-            await _bookRepository.AddAsync(book);
+            await _unitofwork.BookRepository.AddAsync(book);
+            await _unitofwork.CommitAsync();
 
             return CreatedAtAction(nameof(GetBook), new { id = book.BookId }, book);
         }
@@ -52,7 +53,8 @@ namespace Library.API.Controllers
             if (id != book.BookId)
                 return BadRequest("Error update Book");
 
-            await _bookRepository.UpdateAsync(book);
+            _unitofwork.BookRepository.Update(book);
+            await _unitofwork.CommitAsync();
 
             return Ok(book);
         }
@@ -60,12 +62,13 @@ namespace Library.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<Book>> DeleteBook(int id)
         {
-            var book = await _bookRepository.GetByIdAsync(id);
+            var book = await _unitofwork.BookRepository.GetByIdAsync(id);
 
             if (book is null)
                 return NotFound($"Book Id: {id} not found");
 
-            await _bookRepository.DeleteAsync(book);
+            _unitofwork.BookRepository.Delete(book);
+            await _unitofwork.CommitAsync();
 
             return Ok(book);
         }
