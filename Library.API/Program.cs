@@ -42,7 +42,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.ConfigureExceptionHandler(app.Environment);
+// Extrai o logger nativo gerenciado pelo Serilog
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+app.ConfigureExceptionHandler(app.Environment, logger);
 
 app.UseHttpsRedirection();
 
