@@ -1,7 +1,9 @@
+using Library.API.Extentions;
 using Library.EFCore.Context;
 using Library.EFCore.Repositories;
 using LibraryDomain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Serilog; //Log Automatico
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,11 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 //Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+builder.Host.UseSerilog((context, configuration) =>
+    configuration
+        .WriteTo.Console()
+        .WriteTo.File("logs/api-erro-.txt", rollingInterval: RollingInterval.Day));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,6 +41,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.ConfigureExceptionHandler(app.Environment);
 
 app.UseHttpsRedirection();
 
